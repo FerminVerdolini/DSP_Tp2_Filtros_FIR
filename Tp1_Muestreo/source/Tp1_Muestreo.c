@@ -42,10 +42,16 @@
 /* TODO: insert other include files here. */
 #define CAN_FREC 5
 
-
 uint16_t freccuencyBuff[CAN_FREC];
 uint8_t currentFreccuency;
+uint8_t sampleMode;
 
+enum SampleModes{
+    BY_PASS,
+    BUFFER,
+
+    SM_LAST
+};
 
 enum Colors{
     BLUE ,
@@ -61,7 +67,9 @@ enum Colors{
 
 void initBuffers(){
     currentFreccuency = 0;
+    sampleMode = BY_PASS;
 
+//TODO SETEAR ESTE NUMERO CON LOS TICKS NECESARIOS PARA EL ADC
     freccuencyBuff[0] = 8;
     freccuencyBuff[1] = 16;
     freccuencyBuff[2] = 22;
@@ -100,6 +108,15 @@ void ConfigSW(){
     EnableIRQ(BOARD_SW2_IRQ);
     EnableIRQ(BOARD_SW3_IRQ);
 
+}
+
+void ConfigDAC(){
+    dac_config_t dacConfigStruct;
+
+    DAC_GetDefaultConfig(&dacConfigStruct);
+    DAC_Init(DAC0, &dacConfigStruct);
+    DAC_Enable(DAC0, true);             /* Enable output. */
+    DAC_SetBufferReadPointer(DAC0, 0U);
 }
 
 void setLedColor(int color){
@@ -166,6 +183,7 @@ int main(void) {
 #endif
     ConfigLeds();
     ConfigSW();
+    ConfigDAC();
 
     initBuffers();
 
@@ -189,6 +207,12 @@ void BOARD_SW2_IRQ_HANDLER(){
 
 void BOARD_SW3_IRQ_HANDLER(){
     GPIO_PortClearInterruptFlags(BOARD_SW3_GPIO, BOARD_SW3_GPIO_PIN_MASK);
-	setLedColor(CYAN);
+	setNextMode();
 }
 
+/*
+    TODO IRQ DEL PIT QUE CON UN CASE EN sampleMode ponga en la funcion del dac
+DAC_SetBufferValue(DEMO_DAC_BASEADDR, 0U, dacValue);
+el valor del adc o el del buffer
+tambien falta el buffer con los q15 y que el pit cambie el puntero del buffer
+*/
