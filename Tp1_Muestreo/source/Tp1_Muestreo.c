@@ -40,9 +40,15 @@
 #include "MK64F12.h"
 #include "fsl_debug_console.h"
 /* TODO: insert other include files here. */
+#define CAN_FREC 5
+
+
+uint16_t freccuencyBuff[CAN_FREC];
+uint8_t currentFreccuency;
+
 
 enum Colors{
-    BLUE,
+    BLUE ,
     RED,
     GREEN,
     CYAN,
@@ -53,6 +59,27 @@ enum Colors{
     C_LAST
 };
 
+void initBuffers(){
+    currentFreccuency = 0;
+
+    freccuencyBuff[0] = 8;
+    freccuencyBuff[1] = 16;
+    freccuencyBuff[2] = 22;
+    freccuencyBuff[3] = 44;
+    freccuencyBuff[4] = 48;
+}
+
+void setNextFrec(){
+    currentFreccuency++;
+    if(currentFreccuency >= CAN_FREC){
+        currentFreccuency=0;
+    }
+
+    setLedColor(currentFreccuency);
+
+    //TODO ACA NACHO DEBERIA CAMBIAR LA FRECUENCIA DEL ADC
+    //Usando el array at current frec
+}
 
 void ConfigLeds(){
     gpio_pin_config_t led_config = { kGPIO_DigitalOutput,1};
@@ -140,6 +167,8 @@ int main(void) {
     ConfigLeds();
     ConfigSW();
 
+    initBuffers();
+
     PRINTF("Hello World\n");
 
     /* Force the counter to be placed into memory. */
@@ -155,7 +184,7 @@ int main(void) {
 
 void BOARD_SW2_IRQ_HANDLER(){
     GPIO_PortClearInterruptFlags(BOARD_SW2_GPIO, BOARD_SW2_GPIO_PIN_MASK);
-	setLedColor(BLUE);
+	setNextFrec();
 }
 
 void BOARD_SW3_IRQ_HANDLER(){
