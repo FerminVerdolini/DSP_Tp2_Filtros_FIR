@@ -10,10 +10,55 @@
  * Included files
  **********************************************************************************************************************/
 #include "fsl_common.h"
+#include "fsl_pit.h"
+#include "fsl_dac.h"
+#include "fsl_adc16.h"
 
 #if defined(__cplusplus)
 extern "C" {
 #endif /* __cplusplus */
+
+/***********************************************************************************************************************
+ * Definitions
+ **********************************************************************************************************************/
+/* Definitions for BOARD_InitPeripherals functional group */
+/* BOARD_InitPeripherals defines for PIT */
+/* Definition of peripheral ID. */
+#define PIT_PERIPHERAL PIT
+/* Definition of clock source. */
+#define PIT_CLOCK_SOURCE kCLOCK_BusClk
+/* Definition of clock source frequency. */
+#define PIT_CLK_FREQ 60000000UL
+/* Definition of ticks count for channel 0 - deprecated. */
+#define PIT_0_TICKS 7500U
+/* PIT interrupt vector ID (number) - deprecated. */
+#define PIT_0_IRQN PIT0_IRQn
+/* PIT interrupt handler identifier - deprecated. */
+#define PIT_0_IRQHANDLER PIT0_IRQHandler
+/* Definition of channel number for channel 0. */
+#define PIT_CHANNEL_0 kPIT_Chnl_0
+/* Definition of ticks count for channel 0. */
+#define PIT_CHANNEL_0_TICKS 7500U
+/* PIT interrupt vector ID (number). */
+#define PIT_CHANNEL_0_IRQN PIT0_IRQn
+/* PIT interrupt handler identifier. */
+#define PIT_CHANNEL_0_IRQHANDLER PIT0_IRQHandler
+/* Alias for DAC0 peripheral */
+#define DAC0_PERIPHERAL DAC0
+/* Alias for ADC0 peripheral */
+#define ADC0_PERIPHERAL ADC0
+/* ADC0 interrupt vector ID (number). */
+#define ADC0_IRQN ADC0_IRQn
+/* ADC0 interrupt handler identifier. */
+#define ADC0_IRQHANDLER ADC0_IRQHandler
+
+/***********************************************************************************************************************
+ * Global variables
+ **********************************************************************************************************************/
+extern const pit_config_t PIT_config;
+extern const dac_config_t DAC0_config;
+extern const adc16_config_t ADC0_config;
+extern const adc16_channel_mux_mode_t ADC0_muxMode;
 
 /***********************************************************************************************************************
  * Initialization functions

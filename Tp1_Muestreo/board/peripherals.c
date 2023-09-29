@@ -6,11 +6,11 @@
 /* clang-format off */
 /* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 !!GlobalInfo
-product: Peripherals v11.0
+product: Peripherals v13.0
 processor: MK64FN1M0xxx12
 package_id: MK64FN1M0VLL12
 mcu_data: ksdk2_0
-processor_version: 12.0.0
+processor_version: 14.0.0
 board: FRDM-K64F
 functionalGroups:
 - name: BOARD_InitPeripherals
@@ -68,7 +68,8 @@ instance:
 - peripheral: 'NVIC'
 - config_sets:
   - nvic:
-    - interrupt_table: []
+    - interrupt_table:
+      - 0: []
     - interrupts: []
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
@@ -78,11 +79,171 @@ static void NVIC_init(void) {
 } */
 
 /***********************************************************************************************************************
+ * PIT initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'PIT'
+- type: 'pit'
+- mode: 'LPTMR_GENERAL'
+- custom_name_enabled: 'false'
+- type_id: 'pit_ab54f91356454adb874dafbb69e655fd'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'PIT'
+- config_sets:
+  - fsl_pit:
+    - enableRunInDebug: 'false'
+    - timingConfig:
+      - clockSource: 'BusInterfaceClock'
+      - clockSourceFreq: 'ClocksTool_DefaultInit'
+    - channels:
+      - 0:
+        - channel_id: 'CHANNEL_0'
+        - channelNumber: '0'
+        - enableChain: 'false'
+        - timerPeriod: '8khz'
+        - startTimer: 'true'
+        - enableInterrupt: 'true'
+        - interrupt:
+          - IRQn: 'PIT0_IRQn'
+          - enable_interrrupt: 'enabled'
+          - enable_priority: 'false'
+          - priority: '0'
+          - enable_custom_name: 'false'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+const pit_config_t PIT_config = {
+  .enableRunInDebug = false
+};
+
+static void PIT_init(void) {
+  /* Initialize the PIT. */
+  PIT_Init(PIT_PERIPHERAL, &PIT_config);
+  /* Set channel 0 period to 125 µs (7500 ticks). */
+  PIT_SetTimerPeriod(PIT_PERIPHERAL, PIT_CHANNEL_0, PIT_CHANNEL_0_TICKS);
+  /* Enable interrupts from channel 0. */
+  PIT_EnableInterrupts(PIT_PERIPHERAL, PIT_CHANNEL_0, kPIT_TimerInterruptEnable);
+  /* Enable interrupt PIT_CHANNEL_0_IRQN request in the NVIC */
+  EnableIRQ(PIT_CHANNEL_0_IRQN);
+  /* Start channel 0. */
+  PIT_StartTimer(PIT_PERIPHERAL, PIT_CHANNEL_0);
+}
+
+/***********************************************************************************************************************
+ * DAC0 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'DAC0'
+- type: 'dac'
+- mode: 'basic'
+- custom_name_enabled: 'false'
+- type_id: 'dac_a54f338a6fa6fd273bc89d61f5a3b85e'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'DAC0'
+- config_sets:
+  - fsl_dac:
+    - dac_config:
+      - referenceVoltageSource: 'kDAC_ReferenceVoltageSourceVref2'
+      - enableLowPowerMode: 'false'
+    - dac_enable: 'true'
+    - dac_value: '0'
+    - quick_selection: 'QS_DAC_1'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+const dac_config_t DAC0_config = {
+  .referenceVoltageSource = kDAC_ReferenceVoltageSourceVref2,
+  .enableLowPowerMode = false
+};
+
+static void DAC0_init(void) {
+  /* Initialize DAC converter */
+  DAC_Init(DAC0_PERIPHERAL, &DAC0_config);
+  /* Output value of DAC. */
+  DAC_SetBufferValue(DAC0_PERIPHERAL, 0U, 0U);
+  /* Make sure the read pointer is set to the start */
+  DAC_SetBufferReadPointer(DAC0_PERIPHERAL, 0U);
+  /* Enable DAC output */
+  DAC_Enable(DAC0_PERIPHERAL, true);
+}
+
+/***********************************************************************************************************************
+ * ADC0 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'ADC0'
+- type: 'adc16'
+- mode: 'ADC'
+- custom_name_enabled: 'false'
+- type_id: 'adc16_897558f9b7366ed198de18c33097d7d2'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'ADC0'
+- config_sets:
+  - fsl_adc16:
+    - adc16_config:
+      - referenceVoltageSource: 'kADC16_ReferenceVoltageSourceVref'
+      - clockSource: 'kADC16_ClockSourceAsynchronousClock'
+      - enableAsynchronousClock: 'true'
+      - clockDivider: 'kADC16_ClockDivider8'
+      - resolution: 'kADC16_ResolutionSE16Bit'
+      - longSampleMode: 'kADC16_LongSampleDisabled'
+      - hardwareAverageMode: 'kADC16_HardwareAverageDisabled'
+      - enableHighSpeed: 'false'
+      - enableLowPower: 'false'
+      - enableContinuousConversion: 'false'
+    - adc16_channel_mux_mode: 'kADC16_ChannelMuxA'
+    - adc16_hardware_compare_config:
+      - hardwareCompareModeEnable: 'false'
+    - doAutoCalibration: 'false'
+    - offset: '0'
+    - trigger: 'false'
+    - enable_dma: 'false'
+    - enable_irq: 'false'
+    - adc_interrupt:
+      - IRQn: 'ADC0_IRQn'
+      - enable_interrrupt: 'enabled'
+      - enable_priority: 'false'
+      - priority: '0'
+      - enable_custom_name: 'false'
+    - adc16_channels_config: []
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+const adc16_config_t ADC0_config = {
+  .referenceVoltageSource = kADC16_ReferenceVoltageSourceVref,
+  .clockSource = kADC16_ClockSourceAsynchronousClock,
+  .enableAsynchronousClock = true,
+  .clockDivider = kADC16_ClockDivider8,
+  .resolution = kADC16_ResolutionSE16Bit,
+  .longSampleMode = kADC16_LongSampleDisabled,
+  .hardwareAverageMode = kADC16_HardwareAverageDisabled,
+  .enableHighSpeed = false,
+  .enableLowPower = false,
+  .enableContinuousConversion = false
+};
+const adc16_channel_mux_mode_t ADC0_muxMode = kADC16_ChannelMuxA;
+
+static void ADC0_init(void) {
+  /* Initialize ADC16 converter */
+  ADC16_Init(ADC0_PERIPHERAL, &ADC0_config);
+  /* Make sure, that software trigger is used */
+  ADC16_EnableHardwareTrigger(ADC0_PERIPHERAL, false);
+  /* Configure channel multiplexing mode */
+  ADC16_SetChannelMuxMode(ADC0_PERIPHERAL, ADC0_muxMode);
+}
+
+/***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
 void BOARD_InitPeripherals(void)
 {
   /* Initialize components */
+  PIT_init();
+  DAC0_init();
+  ADC0_init();
 }
 
 /***********************************************************************************************************************

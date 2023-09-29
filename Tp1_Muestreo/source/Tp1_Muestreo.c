@@ -39,12 +39,18 @@
 #include "clock_config.h"
 #include "MK64F12.h"
 #include "fsl_debug_console.h"
+#include "arm_math.h"
 /* TODO: insert other include files here. */
 #define CAN_FREC 5
+#define CAN_SAMPLES 5
 
-uint16_t freccuencyBuff[CAN_FREC];
-uint8_t currentFreccuency;
+uint16_t frequencyBuff[CAN_FREC];
+uint8_t currentFrequency;
 uint8_t sampleMode;
+q15_t circular_buffer[CAN_SAMPLES];
+volatile uint16_t rbuff_index = 0;
+volatile uint16_t wbuff_index = 0;
+uint8_t buffer_flag = 0;
 
 enum SampleModes{
     BY_PASS,
@@ -65,28 +71,54 @@ enum Colors{
     C_LAST
 };
 
+void setLedColor(int color);
+
+
 void initBuffers(){
-    currentFreccuency = 0;
+    currentFrequency = 0;
     sampleMode = BY_PASS;
 
 //TODO SETEAR ESTE NUMERO CON LOS TICKS NECESARIOS PARA EL ADC
-    freccuencyBuff[0] = 8;
-    freccuencyBuff[1] = 16;
-    freccuencyBuff[2] = 22;
-    freccuencyBuff[3] = 44;
-    freccuencyBuff[4] = 48;
+// Ec. de ticks: LDVALL = (period/clock period) - 1
+    frequencyBuff[0] = 7499;
+    frequencyBuff[1] = 3749;
+    frequencyBuff[2] = 2726;
+    frequencyBuff[3] = 1363;
+    frequencyBuff[4] = 1249;
+}
+
+q15_t BufferRead(uint16_t rindex){
+	q15_t temp = 0;
+	temp = circular_buffer[rindex];
+	rindex++;
+	if(rindex>=CAN_SAMPLES){
+		rindex = 0;
+	}
+	return temp;
+}
+
+void BufferWrite(uint16_t windex, q15_t value){
+
+	circular_buffer[windex] = value;
+
+	windex++;
+	if(windex>=CAN_SAMPLES){
+		windex = 0;
+	}
+
 }
 
 void setNextFrec(){
-    currentFreccuency++;
-    if(currentFreccuency >= CAN_FREC){
-        currentFreccuency=0;
+    currentFrequency++;
+    if(currentFrequency >= CAN_FREC){
+        currentFrequency=0;
     }
 
-    setLedColor(currentFreccuency);
+    setLedColor(currentFrequency);
 
     //TODO ACA NACHO DEBERIA CAMBIAR LA FRECUENCIA DEL ADC
     //Usando el array at current frec
+    PIT_SetTimerPeriod(PIT_PERIPHERAL, PIT_CHANNEL_0, frequencyBuff[currentFrequency]);
 }
 
 void ConfigLeds(){
@@ -167,6 +199,36 @@ void delay(){
         __asm volatile ("nop");
 	}
 }
+
+
+/* Rutinas de interrupcion */
+
+/* PIT0_IRQn interrupt handler */
+void PIT_CHANNEL_0_IRQHANDLER(void) {
+  uint32_t intStatus;
+  /* Reading all interrupt flags of status register */
+  intStatus = PIT_GetStatusFlags(PIT_PERIPHERAL, PIT_CHANNEL_0);
+  PIT_ClearStatusFlags(PIT_PERIPHERAL, PIT_CHANNEL_0, intStatus);
+  volatile uint16_t g_Adc16ConversionValue = 0;
+
+  /* Place your code here */
+  if(buffer_flag){
+	  BufferWrite(wbuff_index,(q15_t)(ADC16_GetChannelConversionValue(ADC0_PERIPHERAL, 0U) * (3.3)/4096));
+  }
+  else if(!buffer_flag){
+	  g_Adc16ConversionValue = (uint16_t)(ADC16_GetChannelConversionValue(ADC0_PERIPHERAL, 0U) * (3.3)/4096)&(0x0FFF);
+	  DAC_SetBufferValue(DAC0_PERIPHERAL, 0, g_Adc16ConversionValue);
+  }
+
+  /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F
+     Store immediate overlapping exception return operation might vector to incorrect interrupt. */
+  #if defined __CORTEX_M && (__CORTEX_M == 4U)
+    __DSB();
+  #endif
+}
+
+
+
 /*
  * @brief   Application entry point.
  */
@@ -189,13 +251,18 @@ int main(void) {
 
     PRINTF("Hello World\n");
 
+    q15_t buffer_data =0;
+
     /* Force the counter to be placed into memory. */
-    volatile static int i = 0 ;
+
     /* Enter an infinite loop, just incrementing a counter. */
     while(1) {
-        __asm volatile ("nop");
-        /* 'Dummy' NOP to allow source level single stepping of
-            tight while() loop */
+        if(buffer_flag){
+        	if((buffer_data = BufferRead(rbuff_index))>0){
+        		 DAC_SetBufferValue(DAC0_PERIPHERAL, 0, ((uint16_t)buffer_data&0x0fff));
+        	}
+        }
+        delay();
     }
     return 0 ;
 }
@@ -207,7 +274,8 @@ void BOARD_SW2_IRQ_HANDLER(){
 
 void BOARD_SW3_IRQ_HANDLER(){
     GPIO_PortClearInterruptFlags(BOARD_SW3_GPIO, BOARD_SW3_GPIO_PIN_MASK);
-	setNextMode();
+	//setNextMode();
+    buffer_flag = ~ buffer_flag;
 }
 
 /*
