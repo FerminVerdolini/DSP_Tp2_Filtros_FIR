@@ -50,7 +50,7 @@ uint8_t sampleMode;
 q15_t circular_buffer[CAN_SAMPLES];
 volatile uint16_t rbuff_index = 0;
 volatile uint16_t wbuff_index = 0;
-uint8_t buffer_flag = 0;
+uint8_t stop_flag = 0;
 
 enum SampleModes{
     BY_PASS,
@@ -203,7 +203,10 @@ void delay(){
 
 /* Rutinas de interrupcion */
 
-/* PIT0_IRQn interrupt handler */
+/* PIT0_IRQn interrupt handler
+ * Le el valor del ADC, lo escribe en el buffer
+ * y lo convierte por el DAC
+*/
 void PIT_CHANNEL_0_IRQHANDLER(void) {
   uint32_t intStatus;
   /* Reading all interrupt flags of status register */
@@ -212,13 +215,12 @@ void PIT_CHANNEL_0_IRQHANDLER(void) {
   volatile uint16_t g_Adc16ConversionValue = 0;
 
   /* Place your code here */
-  if(buffer_flag){
-	  BufferWrite(wbuff_index,(q15_t)(ADC16_GetChannelConversionValue(ADC0_PERIPHERAL, 0U) * (3.3)/4096));
-  }
-  else if(!buffer_flag){
-	  g_Adc16ConversionValue = (uint16_t)(ADC16_GetChannelConversionValue(ADC0_PERIPHERAL, 0U) * (3.3)/4096)&(0x0FFF);
-	  DAC_SetBufferValue(DAC0_PERIPHERAL, 0, g_Adc16ConversionValue);
-  }
+
+  BufferWrite(wbuff_index,(q15_t)(ADC16_GetChannelConversionValue(ADC0_PERIPHERAL, 0U) * (3.3)/4096));
+
+  g_Adc16ConversionValue = (uint16_t)(ADC16_GetChannelConversionValue(ADC0_PERIPHERAL, 0U) * (3.3)/4096)&(0x0FFF);
+  DAC_SetBufferValue(DAC0_PERIPHERAL, 0, g_Adc16ConversionValue);
+
 
   /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F
      Store immediate overlapping exception return operation might vector to incorrect interrupt. */
@@ -251,31 +253,45 @@ int main(void) {
 
     PRINTF("Hello World\n");
 
-    q15_t buffer_data =0;
+    //q15_t buffer_data =0;
 
     /* Force the counter to be placed into memory. */
 
     /* Enter an infinite loop, just incrementing a counter. */
     while(1) {
+    	/*
         if(buffer_flag){
         	if((buffer_data = BufferRead(rbuff_index))>0){
         		 DAC_SetBufferValue(DAC0_PERIPHERAL, 0, ((uint16_t)buffer_data&0x0fff));
         	}
         }
         delay();
+        */
     }
     return 0 ;
 }
 
+
+/* Cambia la frecuencia con la cual interrumpe el PIT */
 void BOARD_SW2_IRQ_HANDLER(){
     GPIO_PortClearInterruptFlags(BOARD_SW2_GPIO, BOARD_SW2_GPIO_PIN_MASK);
 	setNextFrec();
 }
 
+
+/* Desactiva y activa la interrupcion del PIT de manera alternativa con las presiones del boton,
+ * Deteniendo y continuando el procesamiento de la señal
+ * */
 void BOARD_SW3_IRQ_HANDLER(){
     GPIO_PortClearInterruptFlags(BOARD_SW3_GPIO, BOARD_SW3_GPIO_PIN_MASK);
 	//setNextMode();
-    buffer_flag = ~ buffer_flag;
+    if(!stop_flag){
+    	PIT_DisableInterrupts(PIT_PERIPHERAL, PIT_CHANNEL_0, kPIT_TimerInterruptEnable);
+    }
+    if(stop_flag){
+    	PIT_EnableInterrupts(PIT_PERIPHERAL, PIT_CHANNEL_0, kPIT_TimerInterruptEnable);
+    }
+    stop_flag = ~ stop_flag;
 }
 
 /*
