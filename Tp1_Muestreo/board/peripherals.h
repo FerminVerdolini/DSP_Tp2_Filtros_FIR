@@ -45,20 +45,23 @@ extern "C" {
 #define PIT_CHANNEL_0_IRQHANDLER PIT0_IRQHandler
 /* Alias for DAC0 peripheral */
 #define DAC0_PERIPHERAL DAC0
-/* Alias for ADC0 peripheral */
-#define ADC0_PERIPHERAL ADC0
-/* ADC0 interrupt vector ID (number). */
-#define ADC0_IRQN ADC0_IRQn
-/* ADC0 interrupt handler identifier. */
-#define ADC0_IRQHANDLER ADC0_IRQHandler
+/* Alias for ADC1 peripheral */
+#define ADC1_PERIPHERAL ADC1
+/* ADC1 interrupt vector ID (number). */
+#define ADC1_IRQN ADC0_IRQn
+/* ADC1 interrupt handler identifier. */
+#define ADC1_IRQHANDLER 
+/* Channel 0 (SE.18) conversion control group. */
+#define ADC1_CH0_CONTROL_GROUP 0
 
 /***********************************************************************************************************************
  * Global variables
  **********************************************************************************************************************/
 extern const pit_config_t PIT_config;
 extern const dac_config_t DAC0_config;
-extern const adc16_config_t ADC0_config;
-extern const adc16_channel_mux_mode_t ADC0_muxMode;
+extern adc16_channel_config_t ADC1_channelsConfig[1];
+extern const adc16_config_t ADC1_config;
+extern const adc16_channel_mux_mode_t ADC1_muxMode;
 
 /***********************************************************************************************************************
  * Initialization functions

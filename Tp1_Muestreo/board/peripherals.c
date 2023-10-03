@@ -6,11 +6,11 @@
 /* clang-format off */
 /* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 !!GlobalInfo
-product: Peripherals v13.0
+product: Peripherals v11.0
 processor: MK64FN1M0xxx12
 package_id: MK64FN1M0VLL12
 mcu_data: ksdk2_0
-processor_version: 14.0.0
+processor_version: 12.0.0
 board: FRDM-K64F
 functionalGroups:
 - name: BOARD_InitPeripherals
@@ -96,7 +96,7 @@ instance:
     - enableRunInDebug: 'false'
     - timingConfig:
       - clockSource: 'BusInterfaceClock'
-      - clockSourceFreq: 'ClocksTool_DefaultInit'
+      - clockSourceFreq: 'BOARD_BootClockRUN'
     - channels:
       - 0:
         - channel_id: 'CHANNEL_0'
@@ -170,18 +170,18 @@ static void DAC0_init(void) {
 }
 
 /***********************************************************************************************************************
- * ADC0 initialization code
+ * ADC1 initialization code
  **********************************************************************************************************************/
 /* clang-format off */
 /* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 instance:
-- name: 'ADC0'
+- name: 'ADC1'
 - type: 'adc16'
 - mode: 'ADC'
 - custom_name_enabled: 'false'
 - type_id: 'adc16_897558f9b7366ed198de18c33097d7d2'
 - functional_group: 'BOARD_InitPeripherals'
-- peripheral: 'ADC0'
+- peripheral: 'ADC1'
 - config_sets:
   - fsl_adc16:
     - adc16_config:
@@ -194,7 +194,7 @@ instance:
       - hardwareAverageMode: 'kADC16_HardwareAverageDisabled'
       - enableHighSpeed: 'false'
       - enableLowPower: 'false'
-      - enableContinuousConversion: 'false'
+      - enableContinuousConversion: 'true'
     - adc16_channel_mux_mode: 'kADC16_ChannelMuxA'
     - adc16_hardware_compare_config:
       - hardwareCompareModeEnable: 'false'
@@ -209,10 +209,24 @@ instance:
       - enable_priority: 'false'
       - priority: '0'
       - enable_custom_name: 'false'
-    - adc16_channels_config: []
+    - adc16_channels_config:
+      - 0:
+        - channelName: ''
+        - enableDifferentialConversion: 'false'
+        - channelNumber: 'SE.18'
+        - enableInterruptOnConversionCompleted: 'false'
+        - channelGroup: '0'
+        - initializeChannel: 'true'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
-const adc16_config_t ADC0_config = {
+adc16_channel_config_t ADC1_channelsConfig[1] = {
+  {
+    .channelNumber = 18U,
+    .enableDifferentialConversion = false,
+    .enableInterruptOnConversionCompleted = false,
+  }
+};
+const adc16_config_t ADC1_config = {
   .referenceVoltageSource = kADC16_ReferenceVoltageSourceVref,
   .clockSource = kADC16_ClockSourceAsynchronousClock,
   .enableAsynchronousClock = true,
@@ -222,17 +236,19 @@ const adc16_config_t ADC0_config = {
   .hardwareAverageMode = kADC16_HardwareAverageDisabled,
   .enableHighSpeed = false,
   .enableLowPower = false,
-  .enableContinuousConversion = false
+  .enableContinuousConversion = true
 };
-const adc16_channel_mux_mode_t ADC0_muxMode = kADC16_ChannelMuxA;
+const adc16_channel_mux_mode_t ADC1_muxMode = kADC16_ChannelMuxA;
 
-static void ADC0_init(void) {
+static void ADC1_init(void) {
   /* Initialize ADC16 converter */
-  ADC16_Init(ADC0_PERIPHERAL, &ADC0_config);
+  ADC16_Init(ADC1_PERIPHERAL, &ADC1_config);
   /* Make sure, that software trigger is used */
-  ADC16_EnableHardwareTrigger(ADC0_PERIPHERAL, false);
+  ADC16_EnableHardwareTrigger(ADC1_PERIPHERAL, false);
   /* Configure channel multiplexing mode */
-  ADC16_SetChannelMuxMode(ADC0_PERIPHERAL, ADC0_muxMode);
+  ADC16_SetChannelMuxMode(ADC1_PERIPHERAL, ADC1_muxMode);
+  /* Initialize channel */
+  ADC16_SetChannelConfig(ADC1_PERIPHERAL, ADC1_CH0_CONTROL_GROUP, &ADC1_channelsConfig[0]);
 }
 
 /***********************************************************************************************************************
@@ -243,7 +259,7 @@ void BOARD_InitPeripherals(void)
   /* Initialize components */
   PIT_init();
   DAC0_init();
-  ADC0_init();
+  ADC1_init();
 }
 
 /***********************************************************************************************************************

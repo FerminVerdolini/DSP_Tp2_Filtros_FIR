@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding= "UTF-8" ?>
-<configuration name="MK64FN1M0xxx12" xsi:schemaLocation="http://mcuxpresso.nxp.com/XSD/mex_configuration_14 http://mcuxpresso.nxp.com/XSD/mex_configuration_14.xsd" uuid="684f8c10-948b-4ef5-be5f-d44459a0841f" version="14" xmlns="http://mcuxpresso.nxp.com/XSD/mex_configuration_14" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<configuration name="MK64FN1M0xxx12" xsi:schemaLocation="http://mcuxpresso.nxp.com/XSD/mex_configuration_12 http://mcuxpresso.nxp.com/XSD/mex_configuration_12.xsd" uuid="684f8c10-948b-4ef5-be5f-d44459a0841f" version="12" xmlns="http://mcuxpresso.nxp.com/XSD/mex_configuration_12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
    <common>
       <processor>MK64FN1M0xxx12</processor>
       <package>MK64FN1M0VLL12</package>
@@ -18,13 +18,13 @@
       <generate_registers_defines>false</generate_registers_defines>
    </preferences>
    <tools>
-      <pins name="Pins" version="14.0" enabled="true" update_project_code="true">
+      <pins name="Pins" version="12.0" enabled="true" update_project_code="true">
          <generated_project_files>
             <file path="board/pin_mux.c" update_enabled="true"/>
             <file path="board/pin_mux.h" update_enabled="true"/>
          </generated_project_files>
          <pins_profile>
-            <processor_version>14.0.0</processor_version>
+            <processor_version>12.0.0</processor_version>
             <pin_labels>
                <pin_label pin_num="90" pin_signal="PTC16/UART3_RX/ENET0_1588_TMR0/FB_CS5_b/FB_TSIZ1/FB_BE23_16_BLS15_8_b" label="J1[2]" identifier="TMR_1588_0"/>
                <pin_label pin_num="91" pin_signal="PTC17/UART3_TX/ENET0_1588_TMR1/FB_CS4_b/FB_TSIZ0/FB_BE31_24_BLS7_0_b" label="J1[4]" identifier="TMR_1588_1"/>
@@ -763,13 +763,13 @@
             </function>
          </functions_list>
       </pins>
-      <clocks name="Clocks" version="12.0" enabled="true" update_project_code="true">
+      <clocks name="Clocks" version="10.0" enabled="true" update_project_code="true">
          <generated_project_files>
             <file path="board/clock_config.c" update_enabled="true"/>
             <file path="board/clock_config.h" update_enabled="true"/>
          </generated_project_files>
          <clocks_profile>
-            <processor_version>14.0.0</processor_version>
+            <processor_version>12.0.0</processor_version>
          </clocks_profile>
          <clock_configurations>
             <clock_configuration name="BOARD_BootClockRUN" id_prefix="" prefix_user_defined="false">
@@ -902,41 +902,36 @@
          </dcdx_profile>
          <dcdx_configurations/>
       </dcdx>
-      <periphs name="Peripherals" version="13.0" enabled="true" update_project_code="true">
+      <periphs name="Peripherals" version="11.0" enabled="true" update_project_code="true">
          <dependencies>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.pit" description="PIT Driver is not found in the toolchain/IDE project. The project will not compile!" problem_level="2" source="Peripherals">
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.pit" description="PIT Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
                <feature name="enabled" evaluation="equal">
                   <data type="Boolean">true</data>
                </feature>
             </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.pit" description="An unsupported version of the PIT Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. The project might not compile correctly." problem_level="1" source="Peripherals">
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.pit" description="Unsupported version of the PIT Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. Project might not compile correctly." problem_level="1" source="Peripherals">
                <feature name="version" evaluation="compatible">
                   <data type="Version">2.0.3</data>
                </feature>
             </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.dac" description="DAC Driver is not found in the toolchain/IDE project. The project will not compile!" problem_level="2" source="Peripherals">
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.dac" description="DAC Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
                <feature name="enabled" evaluation="equal">
                   <data type="Boolean">true</data>
                </feature>
             </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.dac" description="An unsupported version of the DAC Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. The project might not compile correctly." problem_level="1" source="Peripherals">
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.dac" description="Unsupported version of the DAC Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. Project might not compile correctly." problem_level="1" source="Peripherals">
                <feature name="version" evaluation="equivalent">
                   <data type="Version">2.0.1</data>
                </feature>
             </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.adc16" description="ADC16 Driver is not found in the toolchain/IDE project. The project will not compile!" problem_level="2" source="Peripherals">
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.adc16" description="ADC16 Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
                <feature name="enabled" evaluation="equal">
                   <data type="Boolean">true</data>
                </feature>
             </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.adc16" description="An unsupported version of the ADC16 Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. The project might not compile correctly." problem_level="1" source="Peripherals">
-               <feature name="version" evaluation="greaterOrEqual">
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.adc16" description="Unsupported version of the ADC16 Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. Project might not compile correctly." problem_level="1" source="Peripherals">
+               <feature name="version" evaluation="equivalent">
                   <data type="Version">2.2.0</data>
-               </feature>
-            </dependency>
-            <dependency resourceType="Tool" resourceId="Clocks" description="The Clocks tool is required by the Peripherals tool, but it is disabled." problem_level="2" source="Peripherals">
-               <feature name="enabled" evaluation="equal">
-                  <data>true</data>
                </feature>
             </dependency>
          </dependencies>
@@ -945,7 +940,7 @@
             <file path="board/peripherals.h" update_enabled="true"/>
          </generated_project_files>
          <peripherals_profile>
-            <processor_version>14.0.0</processor_version>
+            <processor_version>12.0.0</processor_version>
          </peripherals_profile>
          <functional_groups>
             <functional_group name="BOARD_InitPeripherals" uuid="ba93d951-eaa6-447f-8dec-a87581dad20f" called_from_default_init="true" id_prefix="" core="core0">
@@ -967,6 +962,11 @@
                         <data type="Boolean">true</data>
                      </feature>
                   </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="ADC1.adc_se.18" description="Signal SE, channel 18 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routed" evaluation="">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
                </dependencies>
                <instances>
                   <instance name="NVIC" uuid="e7d941d6-fc06-4dd3-8957-14b315f6c20e" type="nvic" type_id="nvic_57b5eef3774cc60acaede6f5b8bddc67" mode="general" peripheral="NVIC" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
@@ -982,7 +982,7 @@
                         <setting name="enableRunInDebug" value="false"/>
                         <struct name="timingConfig">
                            <setting name="clockSource" value="BusInterfaceClock"/>
-                           <setting name="clockSourceFreq" value="ClocksTool_DefaultInit"/>
+                           <setting name="clockSourceFreq" value="BOARD_BootClockRUN"/>
                         </struct>
                         <array name="channels">
                            <struct name="0">
@@ -1013,7 +1013,7 @@
                         <setting name="dac_value" value="0"/>
                      </config_set>
                   </instance>
-                  <instance name="ADC0" uuid="bfd7f285-cf47-4a17-afee-d883983c9247" type="adc16" type_id="adc16_897558f9b7366ed198de18c33097d7d2" mode="ADC" peripheral="ADC0" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
+                  <instance name="ADC1" uuid="bfd7f285-cf47-4a17-afee-d883983c9247" type="adc16" type_id="adc16_897558f9b7366ed198de18c33097d7d2" mode="ADC" peripheral="ADC1" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
                      <config_set name="fsl_adc16">
                         <struct name="adc16_config">
                            <setting name="referenceVoltageSource" value="kADC16_ReferenceVoltageSourceVref"/>
@@ -1025,7 +1025,7 @@
                            <setting name="hardwareAverageMode" value="kADC16_HardwareAverageDisabled"/>
                            <setting name="enableHighSpeed" value="false"/>
                            <setting name="enableLowPower" value="false"/>
-                           <setting name="enableContinuousConversion" value="false"/>
+                           <setting name="enableContinuousConversion" value="true"/>
                         </struct>
                         <setting name="adc16_channel_mux_mode" value="kADC16_ChannelMuxA"/>
                         <struct name="adc16_hardware_compare_config">
@@ -1043,7 +1043,16 @@
                            <setting name="priority" value="0"/>
                            <setting name="enable_custom_name" value="false"/>
                         </struct>
-                        <array name="adc16_channels_config"/>
+                        <array name="adc16_channels_config">
+                           <struct name="0">
+                              <setting name="channelName" value=""/>
+                              <setting name="enableDifferentialConversion" value="false"/>
+                              <setting name="channelNumber" value="SE.18"/>
+                              <setting name="enableInterruptOnConversionCompleted" value="false"/>
+                              <setting name="channelGroup" value="0"/>
+                              <setting name="initializeChannel" value="true"/>
+                           </struct>
+                        </array>
                      </config_set>
                   </instance>
                </instances>

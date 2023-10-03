@@ -50,7 +50,7 @@ uint8_t sampleMode;
 q15_t circular_buffer[CAN_SAMPLES];
 volatile uint16_t rbuff_index = 0;
 volatile uint16_t wbuff_index = 0;
-uint8_t stop_flag = 0;
+uint8_t stop_flag = 1;
 
 enum SampleModes{
     BY_PASS,
@@ -216,9 +216,9 @@ void PIT_CHANNEL_0_IRQHANDLER(void) {
 
   /* Place your code here */
 
-  BufferWrite(wbuff_index,(q15_t)(ADC16_GetChannelConversionValue(ADC0_PERIPHERAL, 0U) * (3.3)/4096));
+  //BufferWrite(wbuff_index,(q15_t)(ADC16_GetChannelConversionValue(ADC1_PERIPHERAL, 0U) * (3.3)/4096));
 
-  g_Adc16ConversionValue = (uint16_t)(ADC16_GetChannelConversionValue(ADC0_PERIPHERAL, 0U) * (3.3)/4096)&(0x0FFF);
+  g_Adc16ConversionValue = (uint16_t)(ADC16_GetChannelConversionValue(ADC1_PERIPHERAL, 0U))>>4;
   DAC_SetBufferValue(DAC0_PERIPHERAL, 0, g_Adc16ConversionValue);
 
 
@@ -275,7 +275,9 @@ int main(void) {
 /* Cambia la frecuencia con la cual interrumpe el PIT */
 void BOARD_SW2_IRQ_HANDLER(){
     GPIO_PortClearInterruptFlags(BOARD_SW2_GPIO, BOARD_SW2_GPIO_PIN_MASK);
-	setNextFrec();
+	if(stop_flag){
+		setNextFrec();
+	}
 }
 
 
@@ -285,13 +287,15 @@ void BOARD_SW2_IRQ_HANDLER(){
 void BOARD_SW3_IRQ_HANDLER(){
     GPIO_PortClearInterruptFlags(BOARD_SW3_GPIO, BOARD_SW3_GPIO_PIN_MASK);
 	//setNextMode();
+    stop_flag = ~ stop_flag;
+    /*
     if(!stop_flag){
     	PIT_DisableInterrupts(PIT_PERIPHERAL, PIT_CHANNEL_0, kPIT_TimerInterruptEnable);
     }
     if(stop_flag){
     	PIT_EnableInterrupts(PIT_PERIPHERAL, PIT_CHANNEL_0, kPIT_TimerInterruptEnable);
     }
-    stop_flag = ~ stop_flag;
+	*/
 }
 
 /*
