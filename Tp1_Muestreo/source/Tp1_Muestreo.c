@@ -42,7 +42,7 @@
 #include "arm_math.h"
 /* TODO: insert other include files here. */
 #define CAN_FREC 5
-#define CAN_SAMPLES 5
+#define CAN_SAMPLES 512
 
 uint16_t frequencyBuff[CAN_FREC];
 uint8_t currentFrequency;
@@ -75,6 +75,7 @@ void setLedColor(int color);
 
 void initBuffers(){
     currentFrequency = 0;
+    setLedColor(BLUE);
     sampleMode = BY_PASS;
 
 //TODO SETEAR ESTE NUMERO CON LOS TICKS NECESARIOS PARA EL ADC
@@ -110,7 +111,12 @@ setNextMode(){
 	sampleMode ++;
 	if(sampleMode == SM_LAST){
 		sampleMode = 0;
+	}
 
+	if(sampleMode== BY_PASS){
+		setLedColor(currentFrequency);
+	}else{
+		setLedColor(WHITE);
 	}
 }
 
@@ -228,7 +234,7 @@ void PIT_CHANNEL_0_IRQHANDLER(void) {
 
         g_Adc16ConversionValue = (uint16_t)(ADC16_GetChannelConversionValue(ADC1_PERIPHERAL, 0U))>>4;
         DAC_SetBufferValue(DAC0_PERIPHERAL, 0, g_Adc16ConversionValue);
-        BufferWrite((q15_t)(g_Adc16ConversionValue) >>4);
+        BufferWrite((q15_t)(g_Adc16ConversionValue));
 
 
     break;
@@ -290,7 +296,9 @@ int main(void) {
 /* Cambia la frecuencia con la cual interrumpe el PIT */
 void BOARD_SW2_IRQ_HANDLER(){
     GPIO_PortClearInterruptFlags(BOARD_SW2_GPIO, BOARD_SW2_GPIO_PIN_MASK);
-	setNextFrec();
+    if(sampleMode == BY_PASS){
+    	setNextFrec();
+    }
 
 }
 
