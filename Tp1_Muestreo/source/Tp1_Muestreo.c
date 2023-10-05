@@ -50,7 +50,6 @@ uint8_t sampleMode;
 q15_t circular_buffer[CAN_SAMPLES];
 volatile uint16_t rbuff_index = 0;
 volatile uint16_t wbuff_index = 0;
-uint8_t stop_flag = 1;
 
 enum SampleModes{
     BY_PASS,
@@ -87,25 +86,32 @@ void initBuffers(){
     frequencyBuff[4] = 1249;
 }
 
-q15_t BufferRead(uint16_t rindex){
+q15_t BufferRead(){
 	q15_t temp = 0;
-	temp = circular_buffer[rindex];
-	rindex++;
-	if(rindex>=CAN_SAMPLES){
-		rindex = 0;
+	temp = circular_buffer[rbuff_index];
+	rbuff_index++;
+	if(rbuff_index>=CAN_SAMPLES){
+		rbuff_index = 0;
 	}
 	return temp;
 }
 
-void BufferWrite(uint16_t windex, q15_t value){
+void BufferWrite(q15_t value){
 
-	circular_buffer[windex] = value;
+	circular_buffer[wbuff_index] = value;
 
-	windex++;
-	if(windex>=CAN_SAMPLES){
-		windex = 0;
+	wbuff_index++;
+	if(wbuff_index>=CAN_SAMPLES){
+		wbuff_index = 0;
 	}
 
+}
+setNextMode(){
+	sampleMode ++;
+	if(sampleMode == SM_LAST){
+		sampleMode = 0;
+
+	}
 }
 
 void setNextFrec(){
@@ -214,14 +220,23 @@ void PIT_CHANNEL_0_IRQHANDLER(void) {
   PIT_ClearStatusFlags(PIT_PERIPHERAL, PIT_CHANNEL_0, intStatus);
   volatile uint16_t g_Adc16ConversionValue = 0;
 
-  /* Place your code here */
+  switch(sampleMode){
+    case BY_PASS:
 
-  //BufferWrite(wbuff_index,(q15_t)(ADC16_GetChannelConversionValue(ADC1_PERIPHERAL, 0U) * (3.3)/4096));
-
-  g_Adc16ConversionValue = (uint16_t)(ADC16_GetChannelConversionValue(ADC1_PERIPHERAL, 0U))>>4;
-  DAC_SetBufferValue(DAC0_PERIPHERAL, 0, g_Adc16ConversionValue);
+    /* Place your code here */
 
 
+        g_Adc16ConversionValue = (uint16_t)(ADC16_GetChannelConversionValue(ADC1_PERIPHERAL, 0U))>>4;
+        DAC_SetBufferValue(DAC0_PERIPHERAL, 0, g_Adc16ConversionValue);
+        BufferWrite((q15_t)(g_Adc16ConversionValue) >>4);
+
+
+    break;
+    case BUFFER: 
+        DAC_SetBufferValue(DAC0_PERIPHERAL, 0, (uint16_t)BufferRead());
+    break;
+  }
+  
   /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F
      Store immediate overlapping exception return operation might vector to incorrect interrupt. */
   #if defined __CORTEX_M && (__CORTEX_M == 4U)
@@ -275,9 +290,8 @@ int main(void) {
 /* Cambia la frecuencia con la cual interrumpe el PIT */
 void BOARD_SW2_IRQ_HANDLER(){
     GPIO_PortClearInterruptFlags(BOARD_SW2_GPIO, BOARD_SW2_GPIO_PIN_MASK);
-	if(stop_flag){
-		setNextFrec();
-	}
+	setNextFrec();
+
 }
 
 
@@ -286,16 +300,8 @@ void BOARD_SW2_IRQ_HANDLER(){
  * */
 void BOARD_SW3_IRQ_HANDLER(){
     GPIO_PortClearInterruptFlags(BOARD_SW3_GPIO, BOARD_SW3_GPIO_PIN_MASK);
-	//setNextMode();
-    stop_flag = ~ stop_flag;
-    /*
-    if(!stop_flag){
-    	PIT_DisableInterrupts(PIT_PERIPHERAL, PIT_CHANNEL_0, kPIT_TimerInterruptEnable);
-    }
-    if(stop_flag){
-    	PIT_EnableInterrupts(PIT_PERIPHERAL, PIT_CHANNEL_0, kPIT_TimerInterruptEnable);
-    }
-	*/
+	setNextMode();
+
 }
 
 /*
