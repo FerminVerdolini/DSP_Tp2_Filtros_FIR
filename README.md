@@ -1,20 +1,27 @@
-# LABORATORIO  1
+# LABORATORIO  2
 
 ## Muestreo con  FRDM-K64F
 
 ### Objetivo:
 
-Manejar el modulo del conversor A/D integrado en el MCU MK64FN1M0VLL12 de la familia Kinetis K64.
+Realizar Diseños e Implementación de filtros FIR usando procesamiento de Bloque y de Muestras simples
 
 ### Descripción:
 
-Realizar un programa aplicativo que sea capaz de digitalizar una señal a través del modulo del ADC disponible en la board FRDM-K64F a distintas velocidades de muestreo, las velocidades requeridas son 8K/S, 16K/S 22K/S, 44K/S y 48K/S. Los cambios de las velocidades de muestreo serán realizados con una de las teclas de la placa de evaluación, en forma de un buffer circular. Cada velocidad de muestreo se indicará a través de un color RGB del LED. Con otra tecla de la placa se habilitara la adquisición o se parara la misma (Run/Stop). Los valores adquiridos serán almacenados en memoria en un buffer circular de 512 muestras del tipo q15 (fraccional 15bits) y a su vez serán enviados a través del DAC (de 12bits).
+Realizar un programa aplicativo que sea capaz de aplicar un filtro FIR, por muestras, a un buffer de memoria de 512 muestras, que es adquirido con el Laboratorio #1 teniendo en cuenta las frecuencias de muestreo de 80 16 KHz, 22 KHz, 44 10Hzy 48 KHz. Con una de las teclas de la placa de evaluación FROM-K64F, se hablitara la aplicación del filtro o se hace bypass del filtro a un buffer de salida distinto del buffer de entrada De este buffer de salida se enviaran las muestras al DAC de la palca FROM-K64F. Visualizar el resultado utilizando un osciloscopio y comparar los resultados.
+
+### Requerimientos de los filtros:
+
+- Pasa Bajos: Fc= 3600Hz Astop-30db
+- Pasa Altos: Fc 35 Hz Astop-30db
+- Pasa Banda Fc1-35Hz, Fc2-3500Hz Astop-30db
+- Elimina Banda Fr 50 Hz Bw-15 Hz Astop=25db
 
 ### Presentación:
 
-1. Mostrar el programa corriendo.
+Subir un archivo con: (uno por grupo, poner los nombres de todos
 
-2. Subir un archivo conteniendo lo siguiente:
-    - Configuración del ambiente (pantallas con timers, adc, etc)
-    - Diagrama de diseño de la aplicación explicando sus partes
-    - Código fuente de la misma con todo el proyecto.
+1. Mostrar el programa corriendo.
+2. Diagrama de diseño de la aplicación
+3. Código fuente de la misma con todo el proyecto en KDS.
+4. Fotos de las formas de onda mas significativas
